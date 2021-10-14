@@ -1,5 +1,10 @@
 # Open Sudoku
 
+This is a fork of [this repository](https://github.com/ogarcia/opensudoku) authored by [Óscar García Amor](https://ogarcia.me/).
+
+I have:
+* integrated [QQWing](https://github.com/stephenostermiller/qqwing), created by Stephen Ostermiller, into the application to allow for offline generation of sudoku puzzles.
+
 [Open Sudoku](https://opensudoku.moire.org/) is a simple open-source Sudoku game.
 It's designed to be controlled both by finger and keyboard.
 It's preloaded with 90 puzzles in 3 difficulty levels.
