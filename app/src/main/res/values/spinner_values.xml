@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string-array name="difficulties">
+        <item>Simple</item>
+        <item>Easy</item>
+        <item>Intermediate</item>
+        <item>Expert</item>
+        <item>Any</item>
+    </string-array>
+
+    <string-array name="symmetries">
+        <item>None</item>
+        <item>Rotate 90</item>
+        <item>Rotate 180</item>
+        <item>Flip</item>
+        <item>Mirror</item>
+        <item>Random</item>
+    </string-array>
+
+</resources>

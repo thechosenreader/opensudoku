@@ -72,6 +72,7 @@
     <string name="yesterday_at_time">yesterday at %s</string>
     <string name="on_date">on %s</string>
     <string name="add_sudoku">Add sudoku</string>
+    <string name="gen_sudoku">Generate sudoku</string>
     <string name="filter">Filter</string>
     <string name="filter_by_gamestate">Filter by game state</string>
     <string name="folders">Folders</string>

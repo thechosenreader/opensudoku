@@ -36,9 +36,11 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
 import android.widget.SimpleCursorAdapter.ViewBinder;
+import android.widget.Spinner;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AlertDialog;
@@ -47,11 +49,19 @@ import androidx.preference.PreferenceManager;
 import org.moire.opensudoku.R;
 import org.moire.opensudoku.db.SudokuColumns;
 import org.moire.opensudoku.db.SudokuDatabase;
+import org.moire.opensudoku.db.SudokuImportParams;
+import org.moire.opensudoku.db.SudokuInvalidFormatException;
 import org.moire.opensudoku.game.CellCollection;
 import org.moire.opensudoku.game.FolderInfo;
 import org.moire.opensudoku.game.SudokuGame;
 import org.moire.opensudoku.utils.ThemeUtils;
+import org.moire.opensudoku.databinding.SudokuGeneratorBinding;
 
+import com.qqwing.Difficulty;
+import com.qqwing.QQWing;
+import com.qqwing.Symmetry;
+
+import java.lang.reflect.Array;
 import java.text.DateFormat;
 import java.util.Date;
 import java.util.List;
@@ -76,6 +86,7 @@ public class SudokuListActivity extends ThemedActivity {
     public static final int MENU_ITEM_SORT = Menu.FIRST + 8;
     public static final int MENU_ITEM_FOLDERS = Menu.FIRST + 9;
     public static final int MENU_ITEM_SETTINGS = Menu.FIRST + 10;
+    public static final int MENU_ITEM_GENERATE = Menu.FIRST + 11;
 
     private static final int DIALOG_DELETE_PUZZLE = 0;
     private static final int DIALOG_RESET_PUZZLE = 1;
@@ -83,6 +94,7 @@ public class SudokuListActivity extends ThemedActivity {
     private static final int DIALOG_EDIT_NOTE = 3;
     private static final int DIALOG_FILTER = 4;
     private static final int DIALOG_SORT = 5;
+    private static final int DIALOG_GENERATE = 6;
 
     private static final String FILTER_STATE_NOT_STARTED = "filter" + SudokuGame.GAME_STATE_NOT_STARTED;
     private static final String FILTER_STATE_PLAYING = "filter" + SudokuGame.GAME_STATE_PLAYING;
@@ -215,6 +227,8 @@ public class SudokuListActivity extends ThemedActivity {
         menu.add(0, MENU_ITEM_FOLDERS, 0, R.string.folders).setShortcut('1', 'f')
                 .setIcon(R.drawable.ic_folder);
         menu.add(0, MENU_ITEM_INSERT, 1, R.string.add_sudoku).setShortcut('1', 'a')
+                .setIcon(R.drawable.ic_add);
+        menu.add(0, MENU_ITEM_GENERATE, 1, R.string.gen_sudoku).setShortcut('1', 'b')
                 .setIcon(R.drawable.ic_add);
         menu.add(0, MENU_ITEM_FILTER, 2, R.string.filter).setShortcut('2', 'f')
                 .setIcon(R.drawable.ic_view);
@@ -368,8 +382,116 @@ public class SudokuListActivity extends ThemedActivity {
                         })
                         .setNegativeButton(android.R.string.no, (dialog, whichButton) -> { })
                         .create();
+
+            case DIALOG_GENERATE:
+                SudokuGeneratorBinding genBinding = SudokuGeneratorBinding.inflate(LayoutInflater.from(this));
+//                Spinner diff_spinner = (Spinner) findViewById(R.id.difficulty_spinner);
+                Spinner diff_spinner = (Spinner) genBinding.difficultySpinner;
+                ArrayAdapter<CharSequence> diff_adapter = ArrayAdapter.createFromResource(this, R.array.difficulties, android.R.layout.simple_spinner_item);
+                diff_adapter.setDropDownViewResource(android.R.layout.simple_spinner_item);
+                diff_spinner.setAdapter(diff_adapter);
+
+//                Spinner symm_spinner = (Spinner) findViewById(R.id.symmetry_spinner);
+                Spinner symm_spinner = (Spinner) genBinding.symmetrySpinner;
+                ArrayAdapter<CharSequence> symm_adapter = ArrayAdapter.createFromResource(this, R.array.symmetries, android.R.layout.simple_spinner_item);
+                symm_adapter.setDropDownViewResource(android.R.layout.simple_spinner_item);
+                symm_spinner.setAdapter(symm_adapter);
+
+                return new AlertDialog.Builder(this)
+                        .setIcon(R.drawable.ic_add)
+                        .setTitle(R.string.gen_sudoku)
+                        .setPositiveButton(android.R.string.yes, (dialog, whichButton) -> {
+
+                            String diff = diff_spinner.getSelectedItem().toString();
+                            String symm = symm_spinner.getSelectedItem().toString();
+
+                            int[] puzzle = generatePuzzle(diff, symm);
+                            String puzzleData = puzzleToDataString(puzzle);
+
+                            Log.d(TAG, "generated puzzle: " + puzzleData);
+
+                            SudokuImportParams importParams = new SudokuImportParams();
+                            importParams.data = puzzleData;
+                            importParams.created = System.currentTimeMillis();
+                            importParams.state = SudokuGame.GAME_STATE_NOT_STARTED;
+                            importParams.time = 0;
+                            importParams.lastPlayed = 0;
+                            importParams.note = "difficulty: " + diff + "\nsymmetry: " + symm;
+
+                            try {
+                                mDatabase.importSudoku(mFolderID, importParams);
+
+                            } catch (SudokuInvalidFormatException e) {
+                                Log.e(TAG, "Invalid Format Exception in generate sudoku", e);
+                            }
+
+                            updateList();
+
+                        })
+                        .setNegativeButton(android.R.string.no, (dialog, whichButton) -> { })
+                        .setView(genBinding.getRoot())
+                        .create();
         }
         return null;
+    }
+
+    private int[] generatePuzzle(String d, String s) {
+        Log.d(TAG, "generating puzzle with difficulty " + d + " and symmetry " + s);
+        Difficulty diff = stringToDifficulty(d);
+        Symmetry   symm = stringToSymmetry(s);
+
+        QQWing gen = new QQWing();
+        gen.generatePuzzleSymmetry(symm);
+
+        if (diff != Difficulty.UNKNOWN) {
+
+            // keep generating puzzles until the standard for difficulty is met
+            // this is how it is done in the actual QQWing application too
+
+            while (diff != gen.getDifficulty()) {
+                gen.generatePuzzleSymmetry(symm);
+            }
+
+        }
+
+        return gen.getPuzzle();
+    }
+
+    private Difficulty stringToDifficulty(String d) {
+        if (d.equals("Simple"))
+            return Difficulty.SIMPLE;
+        else if (d.equals("Easy"))
+            return Difficulty.EASY;
+        else if (d.equals("Intermediate"))
+            return Difficulty.INTERMEDIATE;
+        else if (d.equals("Expert"))
+            return Difficulty.EXPERT;
+
+        return Difficulty.UNKNOWN;
+    }
+
+    private Symmetry stringToSymmetry(String s) {
+        if (s.equals("Rotate 90"))
+            return Symmetry.ROTATE90;
+        else if (s.equals("Rotate 180"))
+            return Symmetry.ROTATE180;
+        else if (s.equals("Flip"))
+            return Symmetry.FLIP;
+        else if (s.equals("Mirror"))
+            return Symmetry.MIRROR;
+        else if (s.equals("Random"))
+            return Symmetry.RANDOM;
+
+        return Symmetry.NONE;
+    }
+
+    private String puzzleToDataString(int[] puzzle) {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < puzzle.length; i++) {
+            sb.append(puzzle[i]);
+        }
+
+        return sb.toString();
     }
 
     @Override
@@ -455,6 +577,10 @@ public class SudokuListActivity extends ThemedActivity {
                 i.setAction(Intent.ACTION_INSERT);
                 i.putExtra(SudokuEditActivity.EXTRA_FOLDER_ID, mFolderID);
                 startActivity(i);
+                return true;
+            }
+            case MENU_ITEM_GENERATE: {
+                showDialog(DIALOG_GENERATE);
                 return true;
             }
             case MENU_ITEM_SETTINGS:

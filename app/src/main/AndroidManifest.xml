@@ -35,19 +35,19 @@
             android:name=".gui.SudokuImportActivity"
             android:label="@string/app_name"
             android:theme="@style/Theme.AppCompat.Dialog">
-            <intent-filter>
-                <action android:name="android.intent.action.VIEW" />
+<!--            <intent-filter>-->
+<!--                <action android:name="android.intent.action.VIEW" />-->
 
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
+<!--                <category android:name="android.intent.category.DEFAULT" />-->
+<!--                <category android:name="android.intent.category.BROWSABLE" />-->
 
-                <data
-                    android:mimeType="application/x-opensudoku"
-                    android:scheme="content" />
-                <data
-                    android:mimeType="application/x-opensudoku"
-                    android:scheme="file" />
-            </intent-filter>
+<!--                <data-->
+<!--                    android:mimeType="application/x-opensudoku"-->
+<!--                    android:scheme="content" />-->
+<!--                <data-->
+<!--                    android:mimeType="application/x-opensudoku"-->
+<!--                    android:scheme="file" />-->
+<!--            </intent-filter>-->
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
 
@@ -82,6 +82,16 @@
 
                 <data
                     android:mimeType="*/*"/>
+                <data
+                    android:host="*"
+                    android:mimeType="*/*"
+                    android:pathPattern=".*\\.opensudoku"
+                    android:scheme="file" />
+                <data
+                    android:host="*"
+                    android:mimeType="*/*"
+                    android:pathPattern=".*\\.opensudoku"
+                    android:scheme="content" />
             </intent-filter>
         </activity>
         <activity
