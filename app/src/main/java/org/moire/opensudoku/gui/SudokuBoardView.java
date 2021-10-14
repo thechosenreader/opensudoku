@@ -434,6 +434,7 @@ public class SudokuBoardView extends View {
 
         // draw cells
         int cellLeft, cellTop;
+        int blockLeft, blockTop;
         if (mCells != null) {
 
             boolean hasBackgroundColorReadOnly = mBackgroundColorReadOnly.getColor() != NO_COLOR;
@@ -516,14 +517,26 @@ public class SudokuBoardView extends View {
             if (mHighlightTouchedCell && mTouchedCell != null) {
                 cellLeft = Math.round(mTouchedCell.getColumnIndex() * mCellWidth) + paddingLeft;
                 cellTop = Math.round(mTouchedCell.getRowIndex() * mCellHeight) + paddingTop;
+
+                blockLeft = Math.round( (mTouchedCell.getColumnIndex() / 3) * (mCellWidth*3) ) + paddingLeft;
+                blockTop = Math.round( (mTouchedCell.getRowIndex() / 3) * (mCellHeight*3) ) + paddingTop;
+
+                // highlights column of touched cell
                 canvas.drawRect(
                         cellLeft, paddingTop,
                         cellLeft + mCellWidth, height,
                         mBackgroundColorTouched);
+                // highlights row of touched cell
                 canvas.drawRect(
                         paddingLeft, cellTop,
                         width, cellTop + mCellHeight,
                         mBackgroundColorTouched);
+                // highlights block of touched cell
+                canvas.drawRect(
+                        blockLeft, blockTop,
+                        blockLeft + (mCellWidth*3), blockTop + (mCellWidth*3),
+                        mBackgroundColorTouched);
+
             }
 
             for (int row = 0; row < 9; row++) {
