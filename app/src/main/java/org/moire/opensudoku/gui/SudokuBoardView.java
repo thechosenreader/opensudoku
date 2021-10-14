@@ -26,6 +26,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
@@ -35,7 +36,9 @@ import org.moire.opensudoku.game.Cell;
 import org.moire.opensudoku.game.CellCollection;
 import org.moire.opensudoku.game.CellNote;
 import org.moire.opensudoku.game.SudokuGame;
+import org.moire.opensudoku.utils.Const;
 
+import java.util.ArrayList;
 import java.util.Collection;
 
 /**
@@ -62,6 +65,7 @@ public class SudokuBoardView extends View {
     private int mHighlightedValue = 0;
     private boolean mReadonly = false;
     private boolean mHighlightWrongVals = true;
+    private boolean mHighlightIncorrectVals = true;
     private boolean mHighlightTouchedCell = true;
     private boolean mAutoHideTouchedCellHint = true;
     private HighlightMode mHighlightSimilarCells = HighlightMode.NONE;
@@ -85,6 +89,9 @@ public class SudokuBoardView extends View {
     private Paint mBackgroundColorSelected;
     private Paint mBackgroundColorHighlighted;
     private Paint mCellValueInvalidPaint;
+
+    // this is only not null if mHighlightIncorrectVals is true
+    private int[][] mSolutionArray;
 
     public SudokuBoardView(Context context) {
         this(context, null);
@@ -259,6 +266,20 @@ public class SudokuBoardView extends View {
 
     public void setHighlightWrongVals(boolean highlightWrongVals) {
         mHighlightWrongVals = highlightWrongVals;
+        postInvalidate();
+    }
+
+    public boolean getHighlightIncorrectVals() { return mHighlightIncorrectVals; }
+
+    public void setHighlightIncorrectVals(boolean highlightIncorrectVals) {
+        mHighlightIncorrectVals = highlightIncorrectVals;
+        postInvalidate();
+    }
+
+    public int[][] getSolutionArray() { return mSolutionArray; }
+
+    public void setSolutionArray(int[][] solnArray) {
+        mSolutionArray = solnArray;
         postInvalidate();
     }
 
@@ -553,6 +574,14 @@ public class SudokuBoardView extends View {
 
                         if (mHighlightWrongVals && !cell.isValid()) {
                             cellValuePaint = mCellValueInvalidPaint;
+                        }
+
+                        if ((mSolutionArray != null) && mHighlightIncorrectVals) {
+                            int correct = mSolutionArray[row][col];
+                            Log.d(Const.TAG, "BoardView: correct = " + correct);
+                            if (correct != 0 && correct != cell.getValue()) {
+                                cellValuePaint = mCellValueInvalidPaint;
+                            }
                         }
 
                         canvas.drawText(Integer.toString(value),

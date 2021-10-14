@@ -213,6 +213,11 @@
                 android:key="highlight_touched_cell"
                 android:summary="@string/highlight_touched_cell_summary"
                 android:title="@string/highlight_touched_cell" />
+            <CheckBoxPreference
+                android:defaultValue="false"
+                android:key="highlight_incorrect_values"
+                android:summary="@string/highlight_incorrect_cell_summary"
+                android:title="@string/highlight_incorrect_cell" />
         </PreferenceScreen>
     </PreferenceCategory>
 </PreferenceScreen>

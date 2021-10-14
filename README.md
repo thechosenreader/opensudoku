@@ -4,6 +4,7 @@ This is a fork of [this repository](https://github.com/ogarcia/opensudoku) autho
 
 I have:
 * integrated [QQWing](https://github.com/stephenostermiller/qqwing), created by Stephen Ostermiller, into the application to allow for offline generation of sudoku puzzles.
+* added the ability to enable highlighting of incorrect values, i.e values that may not necessarily break the rules but are not part of the solution
 
 The original readme follows below.
 

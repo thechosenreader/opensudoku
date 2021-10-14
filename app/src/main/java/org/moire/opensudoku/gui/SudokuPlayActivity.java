@@ -240,6 +240,11 @@ public class SudokuPlayActivity extends ThemedActivity {
         mSudokuBoard.setHighlightWrongVals(gameSettings.getBoolean("highlight_wrong_values", true));
         mSudokuBoard.setHighlightTouchedCell(gameSettings.getBoolean("highlight_touched_cell", true));
 
+        if (gameSettings.getBoolean("highlight_incorrect_values", false)) {
+            mSudokuBoard.setHighlightIncorrectVals(true);
+            mSudokuBoard.setSolutionArray(mSudokuGame.getSolutionArray());
+        }
+
         boolean highlightSimilarCells = gameSettings.getBoolean("highlight_similar_cells", true);
         boolean highlightSimilarNotes = gameSettings.getBoolean("highlight_similar_notes", true);
         if (highlightSimilarCells) {

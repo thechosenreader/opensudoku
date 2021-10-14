@@ -325,6 +325,7 @@ public class SudokuGame {
         }
     }
 
+
     public boolean usedSolver() {
         return mUsedSolver;
     }
@@ -333,6 +334,30 @@ public class SudokuGame {
      * Solves puzzle and fills in correct value for selected cell
      */
     public void solveCell(Cell cell) {
+        int val = getCellSolution(cell);
+        if (val > 0)
+            this.setCellValue(cell, getCellSolution(cell));
+    }
+
+    public int[][] getSolutionArray() {
+        mUsedSolver = true;
+        mSolver = new SudokuSolver();
+        mSolver.setPuzzle(mCells);
+        ArrayList<int[]> finalValues = mSolver.solve();
+
+        int[][] solnArray = new int[9][9];
+        for (int[] rowColVal : finalValues) {
+            int row = rowColVal[0];
+            int col = rowColVal[1];
+            int val = rowColVal[2];
+
+            solnArray[row][col] = val;
+        }
+
+        return solnArray;
+    }
+
+    public int getCellSolution(Cell cell) {
         mSolver = new SudokuSolver();
         mSolver.setPuzzle(mCells);
         ArrayList<int[]> finalValues = mSolver.solve();
@@ -341,10 +366,11 @@ public class SudokuGame {
         int col = cell.getColumnIndex();
         for (int[] rowColVal : finalValues) {
             if (rowColVal[0] == row && rowColVal[1] == col) {
-                int val = rowColVal[2];
-                this.setCellValue(cell, val);
+                return rowColVal[2];
             }
         }
+
+        return 0;
     }
 
     /**

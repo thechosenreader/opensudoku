@@ -401,4 +401,6 @@
     <string name="sort_order_descending">DESC</string>
 
     <string name="press_color_to_apply">Press on Color to apply</string>
+    <string name="highlight_incorrect_cell">Highlight incorrect cell values</string>
+    <string name="highlight_incorrect_cell_summary">Highlight values which are not part of the solution</string>
 </resources>

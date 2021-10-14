@@ -448,9 +448,9 @@ public class SudokuListActivity extends ThemedActivity {
             // keep generating puzzles until the standard for difficulty is met
             // this is how it is done in the actual QQWing application too
 
-            while (diff != gen.getDifficulty()) {
-                gen.generatePuzzleSymmetry(symm);
-            }
+//            while (diff != gen.getDifficulty()) {
+//                gen.generatePuzzleSymmetry(symm);
+//            }
 
         }
 
